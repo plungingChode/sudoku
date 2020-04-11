@@ -1,0 +1,17 @@
+# Controls lib files
+./lib
+./w_include
+
+# VS code config
+.vscode/**
+
+# Text files
+*.txt
+
+# Font files
+*.ttf
+
+# Executables
+*.out
+*.exe
+
