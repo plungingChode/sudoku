@@ -1,93 +1,32 @@
 #include "cell.hpp"
+#include "sudoku.hpp"
 #include <map>
 
 using namespace Controls;
-using namespace std;
 using namespace genv;
 
-vector<vector<int>> Cell::board = vector<vector<int>>(9, vector<int>(9));
-bool Cell::show_invalid = true;
-
-Cell::Cell(vec2 pos, int x, int y)
+Cell::Cell(vec2 pos, int x, int y, Sudoku *owner)
     : Spinner(pos, 0, 0, 9, CELL_SIDE, CELL_SIDE, vec2(7, 10)), 
-      x(x), y(y), row_valid(true), col_valid(true), segment_valid(true), is_preset(false)
+      x(x), y(y), is_preset(false), owner(owner)
 {
-    border = Controls::BLACK;
+    border = BLACK;
 }
 
-void Cell::set_value(int val)
+void Cell::initialize(int value)
 {
-    Spinner::set_value(val);
-    Cell::board[x][y] = value;
-    check_conflicts();
-}
-
-void Cell::check_conflicts()
-{
-    map<int, int> occ;
-
-    set_row_validity(true);
-    for (int rx = 0; rx < 9; rx++)
-    {
-        int val = board[rx][y];
-        if (val > 0)
-        {
-            occ[val]++;
-        }
-        if (occ[val] > 1)
-        {
-            set_row_validity(false);
-            break;
-        }
-    }
-
-    occ.clear();
-    set_col_validity(true);
-    for (int ry = 0; ry < 9; ry++)
-    {
-        int val = board[x][ry];
-        if (val > 0)
-        {
-            occ[val]++;
-        }
-        if (occ[val] > 1)
-        {
-            set_col_validity(false);
-            break;
-        }
-    }
-
-    occ.clear();
-    set_segment_validity(true);
-    int sx = (x/3)*3;
-    int sy = (y/3)*3;
-    for (int rx = sx; rx < sx+3; rx++)
-    {
-        for (int ry = sy; ry < sy+3; ry++)
-        {
-            int val = board[rx][ry];
-            if (val > 0)
-            {
-                occ[val]++;
-            }
-            if (occ[val] > 1)
-            {
-                set_segment_validity(false);
-                break;
-            }
-        }
-    }
+    Spinner::set_value(value);
+    row_invalid = col_invalid = segment_invalid = false;
+    is_preset = (value != 0);
 }
 
 void Cell::update()
 {
-    if (show_invalid && 
-       (!row_valid || !col_valid || !segment_valid))
+    if (owner->show_invalid && (row_invalid || col_invalid || segment_invalid))
     {
         normal_bg = CELL_INVALID;
-        focus_bg = CELL_INVALID;
+        focus_bg = CELL_INVALID_FOCUS;
         hover_bg = CELL_INVALID;
-        hold_bg = CELL_INVALID;
+        hold_bg = CELL_INVALID_FOCUS;
     } 
     else
     {
@@ -116,37 +55,10 @@ void Cell::update()
     }
 }
 
-void Cell::set_row_validity(bool val)
+void Cell::set_value(int val)
 {
-    for (Cell *c : row)
-    {
-        c->row_valid = val;
-        c->schedule_update();
-    }
-}
-
-void Cell::set_col_validity(bool val)
-{
-    for (Cell *c : col)
-    {
-        c->col_valid = val;
-        c->schedule_update();
-    }
-}
-
-void Cell::set_segment_validity(bool val)
-{
-    for (Cell *c : segment)
-    {
-        c->segment_valid = val;
-        c->schedule_update();
-    }
-}
-
-void Cell::reload_board()
-{
-    Spinner::set_value(Cell::board[x][y]);
-    is_preset = (value != 0);
+    Spinner::set_value(val);
+    owner->on_cell_change(x, y, value);
 }
 
 void Cell::on_mouse_ev(const event &ev, bool btn_held)
@@ -158,5 +70,21 @@ void Cell::on_mouse_ev(const event &ev, bool btn_held)
     else
     {
         Spinner::on_mouse_ev(ev, btn_held);
+    }
+}
+
+void Cell::on_key_ev(const event &ev, int key_held)
+{
+    if (is_preset)
+    {
+        Label::on_key_ev(ev, key_held);
+    }
+    else
+    {
+        Spinner::on_key_ev(ev, key_held);
+        if (ev.keycode == key_delete || key_held == key_delete)
+        {
+            set_value(0);
+        }
     }
 }

@@ -1,9 +1,9 @@
 # Controls lib files
-./lib
-./w_include
+/lib
+/lib_include
 
 # VS code config
-.vscode/**
+/.vscode
 
 # Text files
 *.txt
