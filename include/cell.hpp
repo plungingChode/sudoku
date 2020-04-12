@@ -5,10 +5,10 @@
 #include <vector>
 
 static const int CELL_SIDE = 40;
-static const genv::color CELL_INVALID = Controls::hex_to_color("ff5555");
+static const genv::color CELL_INVALID = Controls::hex_to_color(0xff5555);
 static const genv::color CELL_INVALID_FOCUS = Controls::change_tint(CELL_INVALID, 0.5);
-static const genv::color CELL_BG = Controls::hex_to_color("ffffff");
-static const genv::color CELL_FOCUS = Controls::hex_to_color("dddddd");
+static const genv::color CELL_BG = Controls::hex_to_color(0xffffff);
+static const genv::color CELL_FOCUS = Controls::hex_to_color(0xdddddd);
 static const genv::color CELL_TEXT = Controls::BLACK;
 
 class Sudoku;
