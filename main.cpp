@@ -2,7 +2,7 @@
 
 int main()
 {
-    Sudoku s("boards.txt");
+    Sudoku s("boards");
     s.run();
     return 0;
 }

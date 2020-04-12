@@ -13,7 +13,7 @@ Sudoku::Sudoku(std::string boards_file)
     cells = vector<vector<Cell*>>(9, vector<Cell*>(9));
 
     vector<ListBoxItem*> boards;
-    std::ifstream f("boards.txt");
+    std::ifstream f(boards_file);
     while (f.good())
     {
         std::string line;
