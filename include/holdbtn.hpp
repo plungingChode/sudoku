@@ -6,11 +6,11 @@
 class HoldButton : public Controls::Button
 {
 protected:
-    Controls::action_t press_action;
+    int press_action;
 
 public:
-    HoldButton(Controls::vec2 start, Controls::action_t on_press, Controls::action_t on_release, std::string text, int width, std::string font = "", int font_size = 16);
-    HoldButton(Controls::vec2 start, Controls::action_t toggle, std::string text, int width, std::string font = "", int font_size = 16);
+    HoldButton(Controls::Scene *owner, int x, int y, int on_press, int on_release, std::string text, int width, const genv::font *font = nullptr);
+    HoldButton(Controls::Scene *owner, int x, int y, int toggle, std::string text, int width, const genv::font *font = nullptr);
 
     virtual void on_mouse_ev(const genv::event &mouse_ev, bool btn_held = false) override;   
 };

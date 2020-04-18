@@ -20,7 +20,14 @@ public:
 class Sudoku : public Controls::Scene
 {
 protected:
-    const std::string FONT = "LiberationSans-Regular.ttf";
+    enum action_t
+    {
+        a_toggle_inv = 0,
+        a_peek_inv,
+        a_load,
+    };
+
+    const genv::font FONT = genv::font("LiberationSans-Regular.ttf", 16);
     
     std::string boards_file;
 
@@ -30,22 +37,21 @@ protected:
     void toggle_invalid();
     void toggle_invalid_perm();
 
+    Controls::Button *loader;
     Controls::Button *toggle_inv;
     Controls::ListBox *boards_list;
+    HoldButton *peek_inv;
     
-    void load_selected();
-
+    void on_cell_change(int x, int y, int new_val);
     void load_board(const std::string &fname);
     void check_conflicts(int x, int y);
-    
-    bool on_key_event(const genv::event &ev) override;
-    
+        
 public:
     bool show_invalid;
 
     Sudoku(std::string boards_file);
 
-    void on_cell_change(int x, int y, int new_val);
+    void action(int a) override;
 };
 
 #endif

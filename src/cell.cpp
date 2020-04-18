@@ -1,13 +1,14 @@
 #include "cell.hpp"
-#include "sudoku.hpp"
-#include <map>
+#include "scene.hpp"
 
 using namespace Controls;
 using namespace genv;
 
-Cell::Cell(vec2 pos, int x, int y, Sudoku *owner)
-    : Spinner(pos, 0, 0, 9, CELL_SIDE, CELL_SIDE, vec2(7, 10)), 
-      x(x), y(y), is_preset(false), owner(owner)
+bool Cell::SHOW_INVALID = false;
+
+Cell::Cell(Scene *s, int x_, int y_, int col_, int row_)
+    : Spinner(s, x_, y_, 0, 0, 9, CELL_SIDE, CELL_SIDE, vec2(7, 10)), 
+      col(col_), row(row_), is_preset(false)
 {
     border = BLACK;
 }
@@ -21,7 +22,8 @@ void Cell::initialize(int value)
 
 void Cell::update()
 {
-    if (owner->show_invalid && (row_invalid || col_invalid || segment_invalid))
+    if (Cell::SHOW_INVALID && 
+       (row_invalid || col_invalid || segment_invalid))
     {
         normal_bg = CELL_INVALID;
         focus_bg = CELL_INVALID_FOCUS;
@@ -58,7 +60,7 @@ void Cell::update()
 void Cell::set_value(int val)
 {
     Spinner::set_value(val);
-    owner->on_cell_change(x, y, value);
+    owner->action(row*100+col*10+value);
 }
 
 void Cell::on_mouse_ev(const event &ev, bool btn_held)
