@@ -7,26 +7,17 @@
 #include "cell.hpp"
 #include <vector>
 
-class BoardItem : public Controls::ListBoxItem
+enum action_t
 {
-public:
-    std::string name;
-
-    BoardItem(std::string name) : name(name) { }
-
-    std::string to_string() override { return name; };
+    a_toggle_inv = 0,
+    a_peek_inv,
+    a_load,
+    a_cell_changed
 };
 
 class Sudoku : public Controls::Scene
 {
 protected:
-    enum action_t
-    {
-        a_toggle_inv = 0,
-        a_peek_inv,
-        a_load,
-    };
-
     const genv::font FONT = genv::font("LiberationSans-Regular.ttf", 16);
     
     std::string boards_file;
@@ -50,8 +41,6 @@ public:
     bool show_invalid;
 
     Sudoku(std::string boards_file);
-
-    void action(int a) override;
 };
 
 #endif

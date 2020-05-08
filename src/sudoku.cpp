@@ -6,13 +6,13 @@
 using namespace Controls;
 using namespace std;
 
-Sudoku::Sudoku(std::string boards_file) 
-    : Scene(640, 480), boards_file(boards_file), show_invalid(false)
+Sudoku::Sudoku(std::string boards_file_) 
+    : Scene(640, 480), boards_file(boards_file_), show_invalid(false)
 {
     board = vector<vector<int>>(9, vector<int>(9));
     cells = vector<vector<Cell*>>(9, vector<Cell*>(9));
 
-    vector<ListBoxItem*> boards;
+    vector<std::string> boards;
     std::ifstream f(boards_file);
     while (f.good())
     {
@@ -21,7 +21,7 @@ Sudoku::Sudoku(std::string boards_file)
 
         if(!std::isdigit(line[0]))
         {
-            boards.push_back(new BoardItem(line));
+            boards.push_back(line);
         }
     }
     boards_list = new ListBox(this, 400, 23, 150, 6, boards, &FONT);
@@ -30,9 +30,17 @@ Sudoku::Sudoku(std::string boards_file)
     boards_list->set_focus_bg(0xffffff);
     boards_list->set_border_color(0x999999);
 
-    loader = new Button(this, 400, 140, a_load, "Load", 150, &FONT);
-    peek_inv = new HoldButton(this, 23, 390, a_peek_inv, "Peek invalid", 160, &FONT);
-    toggle_inv = new Button(this, 23, 420, a_toggle_inv, "Show invalid", 160, &FONT);
+    auto load_f = [&]() 
+    {
+        if (boards_list->get_selected_index() != -1)
+        {
+            load_board(boards_list->get_selected_item());
+        }
+    };
+    loader = new Button(this, 400, 140, 150, "Load", load_f, &FONT);
+
+    peek_inv = new HoldButton(this, 23, 390, 160, "Peek invalid", [&](){ toggle_invalid(); }, &FONT);
+    toggle_inv = new Button(this, 23, 420, 160, "Show invalid", [&](){ toggle_invalid_perm(); }, &FONT);
 
     for (int x = 0; x < 9; x++)
     {
@@ -45,14 +53,15 @@ Sudoku::Sudoku(std::string boards_file)
                 20+x*(CELL_SIDE-1)+x_gap, 
                 20+y*(CELL_SIDE-1)+y_gap, 
                 x, 
-                y
+                y,
+                [&](int col, int row, int val_) { on_cell_change(col, row, val_); }
             );          
 
             add_control(cells[x][y]);
         }
     }
 
-    load_board(boards[0]->to_string());
+    load_board(boards[0]);
 }
 
 void Sudoku::toggle_invalid()
@@ -180,61 +189,58 @@ void Sudoku::check_conflicts(int x, int y)
     }
 }
 
-void Sudoku::action(int a)
-{
-    // 111 - 999: cell change codes
-    // ^~~~ row
-    //  ^~~ column
-    //   ^~ new value
-    if (a >= 111)
-    {
-        int new_val = a % 10;
-        a /= 10;
-        int col = a % 10;
-        int row = a / 10;
-        on_cell_change(col, row, new_val);
-    }
-    else if (a == a_toggle_inv)
-    {
-        toggle_invalid_perm();
-    }
-    else if (a == a_peek_inv)
-    {
-        toggle_invalid();
-    }
-    else if (a == a_load)
-    {
-        string brd = boards_list->get_selected_item()->to_string();
-        load_board(brd);
-    }
-    else
-    {
-        bool is_cell = false;
+// void Sudoku::action(Controls::event e)
+// {
+//     if (e.type == ev_command)
+//     {
+//         if (e.command == a_cell_changed)
+//         {
+//             // Cell* c = static_cast<Cell*>(src);
+//             // vec2 pos = c->pos();
+//             // on_cell_change(pos.x, pos.y, c->get_value());
+//         }
+//         else if (e.command == a_toggle_inv)
+//         {
+//             toggle_invalid_perm();
+//         }
+//         else if (e.command == a_peek_inv)
+//         {
+//             toggle_invalid();
+//         }
+//         else if (e.command == a_load)
+//         {
+//             string brd = boards_list->get_selected_item();
+//             load_board(brd);
+//         }
+//     }
+//     else if (e.type == genv::ev_key)
+//     {
+//         bool is_cell = false;
 
-        vector<vector<Cell*>>::const_iterator col = cells.begin();
-        for (; col != cells.end(); ++col)
-        {
-            if (find(col->begin(), col->end(), focused) != col->end())
-            {
-                is_cell = true;
-                break;
-            }
-        }
+//         vector<vector<Cell*>>::const_iterator col = cells.begin();
+//         for (; col != cells.end(); ++col)
+//         {
+//             if (find(col->begin(), col->end(), focused) != col->end())
+//             {
+//                 is_cell = true;
+//                 break;
+//             }
+//         }
 
-        if (is_cell)
-        {
-            vec2 pos = static_cast<Cell*>(focused)->pos();
+//         if (is_cell)
+//         {
+//             vec2 pos = static_cast<Cell*>(focused)->pos();
 
-            switch(a)
-            {
-            case -'w': pos.y = std::max(pos.y-1, 0); break;
-            case -'a': pos.x = std::max(pos.x-1, 0); break;
-            case -'s': pos.y = std::min(pos.y+1, 8); break;
-            case -'d': pos.x = std::min(pos.x+1, 8); break;
-            default: break;
-            }
+//             switch(e.keycode)
+//             {
+//             case 'w': pos.y = std::max(pos.y-1, 0); break;
+//             case 'a': pos.x = std::max(pos.x-1, 0); break;
+//             case 's': pos.y = std::min(pos.y+1, 8); break;
+//             case 'd': pos.x = std::min(pos.x+1, 8); break;
+//             default: break;
+//             }
 
-            focus(cells[pos.x][pos.y]);
-        }
-    }
-}
+//             focus(cells[pos.x][pos.y]);
+//         }
+//     }
+// }

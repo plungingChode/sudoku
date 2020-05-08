@@ -1,21 +1,21 @@
 #include "cell.hpp"
-#include "scene.hpp"
+#include "sudoku.hpp"
 
 using namespace Controls;
 using namespace genv;
 
 bool Cell::SHOW_INVALID = false;
 
-Cell::Cell(Scene *s, int x_, int y_, int col_, int row_)
-    : Spinner(s, x_, y_, 0, 0, 9, CELL_SIDE, CELL_SIDE, vec2(7, 10)), 
-      col(col_), row(row_), is_preset(false)
+Cell::Cell(Scene *s, int x_, int y_, int col_, int row_, cell_callback f)
+    : Spinner(s, x_, y_, CELL_SIDE, CELL_SIDE, 0, 0, 9), 
+      col(col_), row(row_), is_preset(false), on_change(f)
 {
     border = BLACK;
 }
 
-void Cell::initialize(int value)
+void Cell::initialize(int init_value)
 {
-    Spinner::set_value(value);
+    Spinner::set_value(init_value);
     row_invalid = col_invalid = segment_invalid = false;
     is_preset = (value != 0);
 }
@@ -60,7 +60,7 @@ void Cell::update()
 void Cell::set_value(int val)
 {
     Spinner::set_value(val);
-    owner->action(row*100+col*10+value);
+    on_change(col, row, value);
 }
 
 void Cell::on_mouse_ev(const event &ev, bool btn_held)
@@ -84,7 +84,7 @@ void Cell::on_key_ev(const event &ev, int key_held)
     else
     {
         Spinner::on_key_ev(ev, key_held);
-        if (ev.keycode == key_delete || key_held == key_delete)
+        if (ev.keycode == genv::key_delete || key_held == genv::key_delete)
         {
             set_value(0);
         }

@@ -12,6 +12,8 @@ static const genv::color CELL_BG = Controls::hex_to_color(0xffffff);
 static const genv::color CELL_FOCUS = Controls::hex_to_color(0xdddddd);
 static const genv::color CELL_TEXT = Controls::BLACK;
 
+typedef std::function<void(int, int, int)> cell_callback;
+
 class Cell : public Controls::Spinner
 {
 protected:
@@ -23,8 +25,9 @@ public:
 
     bool is_preset;
     bool row_invalid, col_invalid, segment_invalid;
+    cell_callback on_change;
 
-    Cell(Controls::Scene *owner, int x, int y, int col, int row);
+    Cell(Controls::Scene *owner, int x, int y, int col, int row, cell_callback on_change);
 
     void initialize(int value);
     Controls::vec2 pos() const { return Controls::vec2(col, row); }

@@ -1,17 +1,10 @@
-# Controls lib files
-/lib
-/lib_include
-
-# VS code config
-/.vscode
-
-# Text files
-*.txt
-
-# Font files
+lib*
+.vscode
+build
+*.a
 *.ttf
-
-# Executables
 *.out
-*.exe
-
+CMakeFiles
+cmake_install.cmake
+CMakeCache.txt
+Makefile
