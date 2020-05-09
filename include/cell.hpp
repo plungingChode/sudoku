@@ -13,24 +13,33 @@ static const genv::color CELL_FOCUS = Controls::hex_to_color(0xdddddd);
 static const genv::color CELL_TEXT = Controls::BLACK;
 
 typedef std::function<void(int, int, int)> cell_callback;
+typedef std::function<void(int, int)> move_callback;
+
+enum cell_flag
+{
+    row_invalid = 0,
+    col_invalid = 1,
+    seg_invalid = 2
+};
 
 class Cell : public Controls::Spinner
 {
 protected:
     int col, row;
+    int invalid_flags;
     void update() override;
+
+    bool is_preset;
+    cell_callback on_change;
+    move_callback move_focus;
 
 public:
     static bool SHOW_INVALID;
 
-    bool is_preset;
-    bool row_invalid, col_invalid, segment_invalid;
-    cell_callback on_change;
-
-    Cell(Controls::Scene *owner, int x, int y, int col, int row, cell_callback on_change);
+    Cell(Controls::Scene *owner, int x, int y, int col, int row, cell_callback on_change, move_callback move_focus);
 
     void initialize(int value);
-    Controls::vec2 pos() const { return Controls::vec2(col, row); }
+    void set_flag(cell_flag f, bool val);
 
     virtual void set_value(int val) override;
     virtual void on_mouse_ev(const genv::event &mouse_ev, bool btn_held) override;
